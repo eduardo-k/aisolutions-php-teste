@@ -25,7 +25,7 @@ class ImportServiceTest extends TestCase
             ],
             [
                 "categoria" =>  "Remessa",
-                "titulo" => "Eget mi proin sed libero enim",
+                "titulo" => "Eget mi proin semestre sed libero enim",
                 "conteúdo" => "Elementum integer enim neque volutpat ac. Enim nec dui nunc mattis enim ut tellus elementum sagittis. Facilisi morbi tempus iaculis urna. Lorem donec massa sapien faucibus et molestie ac. Nunc lobortis mattis aliquam faucibus purus in massa. Vitae purus faucibus ornare suspendisse sed nisi. Urna nunc id cursus metus aliquam eleifend. Accumsan tortor posuere ac ut consequat semper viverra nam libero. Mauris pharetra et ultrices neque ornare aenean euismod elementum nisi. Adipiscing diam donec adipiscing tristique risus. Blandit volutpat maecenas volutpat blandit aliquam etiam erat. Purus viverra accumsan in nisl nisi scelerisque eu. Euismod in pellentesque massa placerat duis. Cursus risus at ultrices mi. Non quam lacus suspendisse faucibus interdum. Mattis aliquam faucibus purus in massa tempor nec feugiat nisl. Est pellentesque elit ullamcorper dignissim cras tincidunt. Praesent semper feugiat nibh sed pulvinar proin gravida hendrerit. Turpis cursus in hac habitasse. Massa massa ultricies mi quis hendrerit dolor magna. Et tortor consequat id porta nibh venenatis cras sed."
             ]
         ]
@@ -52,7 +52,7 @@ class ImportServiceTest extends TestCase
         $this->assertEquals($array, $expectedArray);
     }
 
-    public function test_validateData_should_return_true(): void
+    public function test_validateData_should_return_empty(): void
     {
         $importService = new ImportService;
 
@@ -61,7 +61,7 @@ class ImportServiceTest extends TestCase
         $this->assertEmpty($return);
     }
 
-    public function test_validateData_without_documentos_should_return_false(): void
+    public function test_validateData_without_documentos_should_return_exception(): void
     {
         $importService = new ImportService;
         
@@ -74,7 +74,7 @@ class ImportServiceTest extends TestCase
         $importService->validateData($this->data);
     }
 
-    public function test_validateData_without_documentos_fields_should_return_false(): void
+    public function test_validateData_without_documentos_fields_should_return_exception(): void
     {
         $importService = new ImportService;
 
@@ -94,7 +94,7 @@ class ImportServiceTest extends TestCase
         $importService->validateData($this->data);
     }
 
-    public function test_validateData_with_invalid_documentos_fields_should_return_false(): void
+    public function test_validateData_with_invalid_documentos_fields_should_return_exception(): void
     {
         $importService = new ImportService;
 
@@ -111,10 +111,10 @@ class ImportServiceTest extends TestCase
         $this->expectException(ImportValidationException::class);
         $this->expectExceptionMessage(serialize($errorMessages));
 
-        $validator = $importService->validateData($this->data);
+        $importService->validateData($this->data);
     }
 
-    public function test_validateData_with_oversized_documentos_conteudo_should_return_false(): void
+    public function test_validateData_with_oversized_documentos_conteudo_should_return_exception(): void
     {
         $importService = new ImportService;
 
@@ -127,7 +127,34 @@ class ImportServiceTest extends TestCase
         $this->expectException(ImportValidationException::class);
         $this->expectExceptionMessage(serialize($errorMessages));
 
-        $validator = $importService->validateData($this->data);
+        $importService->validateData($this->data);
+    }
+
+    public function test_validateBusinessRules_should_return_empty(): void
+    {
+        $importService = new ImportService;
+
+        $this->data['documentos'][0]['titulo'] = 'Teste de título com SemEstrE';
+        $this->data['documentos'][1]['titulo'] = 'Teste de título com JANEIRO';
+
+        $return = $importService->validateBusinessRules($this->data);
+
+        $this->assertEmpty($return);
+    }
+
+    public function test_validateBusinessRules_with_invalid_remessa_title_should_return_exception(): void
+    {
+        $importService = new ImportService;
+
+        $errorMessages = [
+            "0. Title must have 'semestre' when category is 'Remessa'",
+            "1. Title must have month when category is 'Remessa Parcial'",
+        ];
+
+        $this->expectException(ImportValidationException::class);
+        $this->expectExceptionMessage(serialize($errorMessages));
+
+        $importService->validateBusinessRules($this->data);
     }
 
     public function test_createDocument_should_return_valid()
