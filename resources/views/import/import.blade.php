@@ -32,11 +32,11 @@
         </div>
     @endif
 
-    @if($errors->any())
+    @if(!empty($errors))
         <div class="col-md-10 mx-auto col-lg-5 text-center">
             <div class="alert alert-danger">
                 <ul>
-                    @foreach ($errors->all() as $error)
+                    @foreach ($errors as $error)
                     <li>{{ $error }}</li>
                     @endforeach
                 </ul>

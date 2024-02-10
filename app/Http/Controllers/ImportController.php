@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ImportValidationException;
 use App\Jobs\ProcessDocuments;
 use App\Services\CategoryService;
 use App\Services\ImportService;
@@ -22,31 +23,42 @@ class ImportController extends Controller
 
     public function processImport(Request $request) 
     {
-        $request->validate(['file' => 'required|file|mimetypes:application/json']);
+        try {
+            $request->validate(['file' => 'required|file|mimetypes:application/json']);
 
-        $fileAsArray = $this->importService->convertFileToArray($request->file('file'));
-        $validator = $this->importService->validateData($fileAsArray);
+            $fileAsArray = $this->importService->convertFileToArray($request->file('file'));
 
-        if ($validator->fails()) {
-            return view('import/import')->with('errors', $validator->messages());
+            $this->importService->validateData($fileAsArray);
+            $this->importService->validateBusinessRules($fileAsArray);
+
+            foreach($fileAsArray['documentos'] as $documentAsArray) {
+                $category = $this->categoryService->firstOrCreate($documentAsArray['categoria']);
+                $documentAsArray['category_id'] = $category->id;
+
+                $document = $this->importService->createDocument($documentAsArray);
+
+                ProcessDocuments::dispatch($document);
+            }
+
+            return view('import/dispatch');
+        } 
+        catch (ImportValidationException $e) {
+            return view('import/import')->with('errors', unserialize($e->getMessage()));
         }
-
-        foreach($fileAsArray['documentos'] as $documentAsArray) {
-            $category = $this->categoryService->firstOrCreate($documentAsArray['categoria']);
-            $documentAsArray['category_id'] = $category->id;
-
-            $document = $this->importService->createDocument($documentAsArray);
-
-            ProcessDocuments::dispatch($document);
+        catch (\Exception $e) {
+            return view('import/import')->with('errors', [$e->getMessage()]);
         }
-
-        return view('import/dispatch');
     }
 
     public function dispatch()
     {
-        Artisan::call('queue:work --stop-when-empty', []);
+        try {
+            Artisan::call('queue:work --stop-when-empty', []);
 
-        return view('import/import')->with('message', 'Fila processada!');
+            return view('import/import')->with('message', 'Fila processada!');
+        }
+        catch (\Exception $e) {
+            return view('import/import')->with('errors', [$e->getMessage()]);
+        }
     }
 }
