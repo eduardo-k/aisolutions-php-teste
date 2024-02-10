@@ -43,10 +43,10 @@ class ImportController extends Controller
             return view('import/dispatch');
         } 
         catch (ImportValidationException $e) {
-            return view('import/import')->with('errors', unserialize($e->getMessage()));
+            return view('import/import')->with('alerts', unserialize($e->getMessage()));
         }
         catch (\Exception $e) {
-            return view('import/import')->with('errors', [$e->getMessage()]);
+            return view('import/import')->with('alerts', [$e->getMessage()]);
         }
     }
 
@@ -58,7 +58,7 @@ class ImportController extends Controller
             return view('import/import')->with('message', 'Fila processada!');
         }
         catch (\Exception $e) {
-            return view('import/import')->with('errors', [$e->getMessage()]);
+            return view('import/import')->with('alerts', [$e->getMessage()]);
         }
     }
 }

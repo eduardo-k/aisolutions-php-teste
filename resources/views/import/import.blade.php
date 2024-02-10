@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    @if(!empty($message))
+    @if(isset($message))
         <div class="col-md-10 mx-auto col-lg-5 text-center">
             <div class="alert alert-success">
                 {{ $message }}
@@ -32,12 +32,12 @@
         </div>
     @endif
 
-    @if(!empty($errors))
+    @if(isset($alerts))
         <div class="col-md-10 mx-auto col-lg-5 text-center">
             <div class="alert alert-danger">
                 <ul>
-                    @foreach ($errors as $error)
-                    <li>{{ $error }}</li>
+                    @foreach ($alerts as $alert)
+                    <li>{{ $alert }}</li>
                     @endforeach
                 </ul>
             </div>
