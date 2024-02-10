@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ImportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::controller(ImportController::class)
+    ->prefix('import')
+    ->group(function () {
+        Route::get('/', 'import');
+        Route::post('/', 'processImport');
+        Route::get('/dispatch', 'dispatch');
+    });
