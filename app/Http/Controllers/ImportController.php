@@ -32,7 +32,7 @@ class ImportController extends Controller
             $this->importService->validateBusinessRules($fileAsArray);
 
             foreach($fileAsArray['documentos'] as $documentAsArray) {
-                $category = $this->categoryService->firstOrCreate($documentAsArray['categoria']);
+                $category = $this->categoryService->firstOrCreateByName($documentAsArray['categoria']);
                 $documentAsArray['category_id'] = $category->id;
 
                 $document = $this->importService->createDocument($documentAsArray);

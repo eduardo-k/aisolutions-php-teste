@@ -10,11 +10,23 @@ use Illuminate\Support\Facades\Validator;
 
 class ImportService
 {
+    /**
+     * Convert a json file to array.
+     *
+     * @param UploadedFile $file
+     * @return array
+     */
     public function convertFileToArray(UploadedFile $file): array
     {
         return json_decode(json: File::get($file), associative: true);
     }
 
+    /**
+     * Check input array validations.
+     *
+     * @param array $data
+     * @return void|ImportValidationException
+     */
     public function validateData(array $data): void 
     {
         $errors = [];
@@ -35,10 +47,16 @@ class ImportService
         }
 
         if ($errors) {
-            throw new ImportValidationException(serialize($errors));
+            throw new ImportValidationException($errors);
         }
     }
 
+    /**
+     * Check input array business rules.
+     *
+     * @param array $data
+     * @return void|ImportValidationException
+     */
     public function validateBusinessRules(array $data): void
     {
         $errors = [];
@@ -54,10 +72,16 @@ class ImportService
         }
 
         if ($errors) {
-            throw new ImportValidationException(serialize($errors));
+            throw new ImportValidationException($errors);
         }
     }
 
+    /**
+     * Creates document type variable.
+     *
+     * @param array $document
+     * @return array
+     */
     public function createDocument(array $document): array
     {
         return [
